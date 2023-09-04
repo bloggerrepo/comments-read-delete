@@ -3,6 +3,8 @@ package com.htc.comments.controller;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,7 +15,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.htc.comments.CustomException.ResourceNotFoundException;
 import com.htc.comments.entity.Comment;
 import com.htc.comments.repo.CommentRepository;
@@ -24,11 +25,8 @@ public class CommentController {
 
 	@Autowired
 	CommentRepository commentRepository;
+	private static final Logger logger = LoggerFactory.getLogger(CommentController.class);
 
-	@GetMapping("/comments")
-	public List<Comment> getAllComments() {
-		return commentRepository.findAll();
-	}
 
 	@PostMapping("/comments")
 	public Comment createComment(@RequestBody Comment comment) {
@@ -39,6 +37,7 @@ public class CommentController {
 
 	@GetMapping("/comments/{id}")
 	public Comment getCommentById(@PathVariable(value = "id") Long commentId) {
+		logger.info("get comment by id : " + commentId);
 		return commentRepository.findById(commentId)
 				.orElseThrow(() -> new ResourceNotFoundException("Comment", "id", commentId));
 	}
@@ -59,25 +58,13 @@ public class CommentController {
 
 	@DeleteMapping("/comments/{id}")
 	public ResponseEntity<?> deleteComment(@PathVariable(value = "id") Long commentId) {
+		logger.info("deletecomment {}", commentId);
 		Comment comment = commentRepository.findById(commentId)
 				.orElseThrow(() -> new ResourceNotFoundException("Comment", "id", commentId));
 
 		commentRepository.delete(comment);
 
 		return ResponseEntity.ok().build();
-	}
-
-	@GetMapping("/get")
-	public Comment dummyComment() {
-		Comment comment = new Comment();
-		comment.setId(3L);
-		comment.setPostName("Java");
-		comment.setComment("Practice Everyday");
-		comment.setCreatedAt(LocalDateTime.now());
-		comment.setUpdatedAt(LocalDateTime.now());
-
-		return comment;
-
 	}
 
 }
